@@ -1,4 +1,4 @@
-﻿import discord
+import discord
 from discord.ext import commands
 from discord.utils import get
 
@@ -25,6 +25,7 @@ class MyCog(commands.Cog):
             embed.set_image(url='{}'.format(userAvatarUrl))
             await ctx.reply(embed=embed, mention_author=False) 
 
+    #Kicks the user
     @bot.command(pass_context=True)
     async def korkick(self, ctx, user: discord.Member):
         #if(ctx.message.mentions[0].id == 206003447655432192): #Checks id of the person who tagged
@@ -36,9 +37,15 @@ class MyCog(commands.Cog):
     async def korpoll(self, ctx, question, *options: str):
 
         if len(options) > 2:
-            await ctx.send('```Error! Syntax = [~poll "question" "option1" "option2"] ```')
+            embed = discord.Embed(description='❌ "Question", "Option1", "Option2"',
+                                  color=discord.Color.red())
+            await ctx.reply(embed=embed, mention_author=False)
             return
-
+        elif len(options) < 2 or len(options) == 0:
+            embed = discord.Embed(description='❌ Please specify 3 options ',
+                                  color=discord.Color.red())
+            await ctx.reply(embed=embed, mention_author=False)
+            return
         if len(options) == 2 and options[0] == "yes" and options[1] == "no":
             reactions = ['👍', '👎']
         else:
