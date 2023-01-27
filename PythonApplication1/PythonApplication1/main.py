@@ -1,10 +1,12 @@
-﻿import discord
+import discord
 from discord.ext import commands
 from discord.utils import get
 import random
 import os
 import asyncio
+from discord import app_commands
 
+bot = commands.Bot(command_prefix="+", intents= discord.Intents.all())
 client = commands.Bot(command_prefix="+", intents=discord.Intents.all())
 discord_status = "+korhelp"
 
@@ -12,16 +14,19 @@ discord_status = "+korhelp"
 async def on_ready():
     print("Bot is connected to discord")
     await  client.change_presence(activity=discord.Game(discord_status)) 
+    synced = await client.tree.sync()
+    print(f"Synced {len(synced)} " + "commands.")
+
 
 @client.command()
 async def ping(ctx):
     await ctx.send("Pong!")
 
-@client.command()
-async def korhelp(ctx):
-    read_help = "Korcm Bot is a useful discord bot which provides korcm commands.\n\n -> *+korhelp* - Shows all the commands.\n-> *+korandom* - Generates random koray statement.\n-> *+korpick (number)* - Generates a koray statement that you've picked.\n-> *+korembed* - Displays your profile.\n-> *+korpoll* - Poll"
-   
-    await ctx.send(read_help)
+@client.tree.command(name= "korhelp")
+async def korhelp(interaction: discord.Interaction):
+    read_help = "Korcm Bot is a useful discord bot which provides korcm commands.\n\n -> *+korhelp* - Shows all the commands.\n-> *+korandom* - Generates random koray statement.\n-> *+korpick (number)* - Generates a koray statement that you've picked.\n-> *+korembed* - Displays your profile.\n-> *+korpoll* - Poll -Question- -Option1- -Option2-"
+    read_help2 = "\n\nAlso you can use */* prefix to use some commands.\n\n->*/korhelp*\n->*/korembed*\n->*/korpick (number)*"
+    await interaction.response.send_message(f"Hey {interaction.user.mention}!\n" + read_help + read_help2)
 
 @client.command()
 async def korandom(ctx):
@@ -37,6 +42,26 @@ async def korpick(ctx, number):
         line = f.readlines()[int(number) - 1]
         line = line.replace(' ', '-) ', 1)
     await ctx.send(line)
+
+@client.tree.command(name= "korpick", description= "Pick a number between 1-520")
+async def korpick(interaction: discord.Interaction, number: int): #You need to specify number's type
+    with open("d:\\w10\\Desktop\\message.txt", "r") as f:
+        line = f.readlines()[int(number) - 1]
+        line = line.replace(' ', '-) ', 1)
+    await interaction.response.send_message(line)
+
+@client.tree.command(name= "korembed", description= "Tag a user")
+async def korembed(interaction: discord.Interaction, avamember: discord.Member = None):
+    if avamember == None:
+         embed = discord.Embed(description='❌ Error! Please specify a user',
+                                  color=discord.Color.red())
+         await interaction.response.send_message(embed=embed, mention_author=False)
+    else:
+         userAvatarUrl = avamember.avatar
+         embed = discord.Embed(title=('{}\'s Avatar'.format(avamember.name)), colour=discord.Colour.red())   
+         embed.set_image(url='{}'.format(userAvatarUrl))
+         await interaction.response.send_message(embed=embed)
+
 
 @client.event
 async def on_raw_reaction_add(payload):
@@ -56,6 +81,6 @@ async def load():
 async def main():
     async with client:
         await load()
-        await client.start("MTA2ODExOTIwOTIyNzMyOTYwNw.GrZ4IT.vL066vqj_9MOARyNAtBtgkZpNWtsdpURRxBf5Y")
+        await client.start("MTA2ODExOTIwOTIyNzMyOTYwNw.GKUVCk.6iWi_4HfqOx0A9VcOHGGzwEt7r4RIOmJilg-nc")
 
 asyncio.run(main())
